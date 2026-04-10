@@ -1,0 +1,41 @@
+package com.example.demo.serviceImpl;
+
+import com.example.demo.entity.Foyer;
+import com.example.demo.repository.FoyerRepository;
+import com.example.demo.service.FoyerService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class FoyerServiceImpl implements FoyerService {
+
+    private final FoyerRepository foyerRepository;
+
+    @Override
+    public Foyer addFoyer(Foyer f) {
+        return foyerRepository.save(f);
+    }
+
+    @Override
+    public List<Foyer> getAllFoyers() {
+        return foyerRepository.findAll();
+    }
+
+    @Override
+    public Foyer getFoyerById(Long id) {
+        return foyerRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Foyer updateFoyer(Foyer f) {
+        return foyerRepository.save(f);
+    }
+
+    @Override
+    public void deleteFoyer(Long id) {
+        foyerRepository.deleteById(id);
+    }
+}
