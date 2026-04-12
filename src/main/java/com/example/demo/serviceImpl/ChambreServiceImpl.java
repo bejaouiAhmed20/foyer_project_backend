@@ -1,6 +1,7 @@
 package com.example.demo.serviceImpl;
 
 import com.example.demo.entity.Chambre;
+import com.example.demo.repository.BlocRepository;
 import com.example.demo.repository.ChambreRepository;
 import com.example.demo.service.ChambreService;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,13 @@ import java.util.List;
 public class ChambreServiceImpl implements ChambreService {
 
     private final ChambreRepository chambreRepository;
+    private final BlocRepository blocRepository;
 
     @Override
     public Chambre addChambre(Chambre c) {
+        if (c.getBloc() != null && c.getBloc().getIdBloc() != null) {
+            c.setBloc(blocRepository.findById(c.getBloc().getIdBloc()).orElse(null));
+        }
         return chambreRepository.save(c);
     }
 

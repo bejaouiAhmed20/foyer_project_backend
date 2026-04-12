@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,9 +22,10 @@ public class Chambre {
     private TypeChambre type;
 
     @ManyToOne
-    @JsonIgnore
+    @JsonIgnoreProperties({"chambres", "reservations"})
     private Bloc bloc;
 
     @OneToMany(mappedBy = "chambre")
+    @JsonIgnore
     private List<Reservation> reservations = new ArrayList<>();
 }

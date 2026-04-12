@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -23,7 +24,7 @@ public class Reservation {
     private Boolean estValide;
 
     @ManyToOne
-    @JsonIgnore
+    @JsonIgnoreProperties({"reservations", "bloc"})
     private Chambre chambre;
     @ManyToMany
     private Set<Etudiant> etudiants = new HashSet<>();

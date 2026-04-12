@@ -15,4 +15,10 @@ public interface ReservationService {
     Reservation updateReservation(Reservation r);
 
     void deleteReservation(String id);
+
+    boolean isChambreAvailable(Long chambreId);
+
+    Reservation validateReservation(String id);
+
+    Reservation cancelReservation(String id);
 }

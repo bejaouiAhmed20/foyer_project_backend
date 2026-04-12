@@ -3,7 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.entity.Foyer;
 import com.example.demo.service.FoyerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -32,6 +34,15 @@ public class FoyerController {
     @PutMapping
     public Foyer updateFoyer(@RequestBody Foyer f) {
         return foyerService.updateFoyer(f);
+    }
+
+    @PutMapping("/{foyerId}/universite/{universiteId}")
+    public Foyer linkUniversite(@PathVariable Long foyerId, @PathVariable Long universiteId) {
+        try {
+            return foyerService.linkUniversite(foyerId, universiteId);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
     }
 
     @DeleteMapping("/{id}")
