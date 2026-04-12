@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FoyerRepository extends JpaRepository<Foyer, Long> {
     Foyer findByNomFoyer(String nomFoyer);
+    boolean existsByNomFoyer(String nomFoyer);
 }

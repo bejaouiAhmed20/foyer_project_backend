@@ -2,17 +2,23 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Foyer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long idFoyer;
 
     private String nomFoyer;
@@ -22,6 +28,7 @@ public class Foyer {
     @JsonIgnore
     private Universite universite;
 
-    @OneToMany(mappedBy = "foyer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "foyer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Bloc> blocs = new ArrayList<>();
 }

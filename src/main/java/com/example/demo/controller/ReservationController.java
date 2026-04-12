@@ -1,11 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ReservationDTO;
 import com.example.demo.entity.Reservation;
 import com.example.demo.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,62 +18,53 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public Reservation addReservation(@RequestBody Reservation r) {
-        try {
-            return reservationService.addReservation(r);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
+    public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody ReservationDTO dto) {
+        Reservation saved = reservationService.createReservation(dto);
+        return ResponseEntity.ok(reservationService.convertToDTO(saved));
     }
 
     @GetMapping
-    public List<Reservation> getAllReservations() {
-        return reservationService.getAllReservations();
+    public List<ReservationDTO> getAllReservations() {
+        return reservationService.getAllReservationDTOs();
     }
 
     @GetMapping("/{id}")
-    public Reservation getById(@PathVariable String id) {
-        return reservationService.getReservationById(id);
+    public ReservationDTO getReservationById(@PathVariable String id) {
+        Reservation res = reservationService.getReservationById(id);
+        return reservationService.convertToDTO(res);
     }
 
     @PutMapping
-    public Reservation updateReservation(@RequestBody Reservation r) {
-        try {
-            return reservationService.updateReservation(r);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
+    public ResponseEntity<ReservationDTO> updateReservation(@Valid @RequestBody ReservationDTO dto) {
+        // Map DTO to entity for update (or add service.updateReservation(ReservationDTO))
+        Reservation existing = reservationService.getReservationById(dto.getIdReservation());
+        existing.setAnneeUniversitaire(dto.getAnneeUniversitaire());
+        existing.setEstValide(dto.isEstValide());
+        // Update chambre/etudiants if changed, but for simplicity update basics
+        Reservation updated = reservationService.updateReservation(existing);
+        return ResponseEntity.ok(reservationService.convertToDTO(updated));
     }
 
     @PutMapping("/{id}/validate")
-    public Reservation validateReservation(@PathVariable String id) {
-        try {
-            return reservationService.validateReservation(id);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+    public ReservationDTO validateReservation(@PathVariable String id) {
+        Reservation res = reservationService.validateReservation(id);
+        return reservationService.convertToDTO(res);
     }
 
     @PutMapping("/{id}/cancel")
-    public Reservation cancelReservation(@PathVariable String id) {
-        try {
-            return reservationService.cancelReservation(id);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+    public ReservationDTO cancelReservation(@PathVariable String id) {
+        Reservation res = reservationService.cancelReservation(id);
+        return reservationService.convertToDTO(res);
     }
 
     @GetMapping("/availability/{chambreId}")
     public boolean isChambreAvailable(@PathVariable Long chambreId) {
-        try {
-            return reservationService.isChambreAvailable(chambreId);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
+        return reservationService.isChambreAvailable(chambreId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReservation(@PathVariable String id) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable String id) {
         reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

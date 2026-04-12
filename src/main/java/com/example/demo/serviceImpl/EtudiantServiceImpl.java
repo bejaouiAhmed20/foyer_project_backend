@@ -3,10 +3,10 @@ package com.example.demo.serviceImpl;
 import com.example.demo.entity.Etudiant;
 import com.example.demo.repository.EtudiantRepository;
 import com.example.demo.service.EtudiantService;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class EtudiantServiceImpl implements EtudiantService {
 
     @Override
     public Etudiant getEtudiantById(Long id) {
-        return etudiantRepository.findById(id).orElse(null);
+        return etudiantRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Etudiant not found with id: " + id));
     }
 
     @Override

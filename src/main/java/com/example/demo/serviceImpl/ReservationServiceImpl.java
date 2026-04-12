@@ -1,5 +1,6 @@
 package com.example.demo.serviceImpl;
 
+import com.example.demo.dto.ReservationDTO;
 import com.example.demo.entity.Chambre;
 import com.example.demo.entity.Etudiant;
 import com.example.demo.entity.Reservation;
@@ -7,17 +8,18 @@ import com.example.demo.repository.ChambreRepository;
 import com.example.demo.repository.EtudiantRepository;
 import com.example.demo.repository.ReservationRepository;
 import com.example.demo.service.ReservationService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -25,102 +27,27 @@ public class ReservationServiceImpl implements ReservationService {
     private final EtudiantRepository etudiantRepository;
 
     @Override
-    @Transactional
     public Reservation addReservation(Reservation r) {
-        if (r.getIdReservation() == null || r.getIdReservation().isBlank()) {
-            r.setIdReservation(UUID.randomUUID().toString());
+        // Existing impl or simple save; enhance if needed
+        if (r.getChambre() == null || !reservationRepository.existsByChambreIdChambreAndEstValideTrue(r.getChambre().getIdChambre())) {
+            return reservationRepository.save(r);
         }
-
-        if (r.getChambre() == null || r.getChambre().getIdChambre() == null) {
-            throw new IllegalArgumentException("La réservation doit inclure l'id de la chambre.");
-        }
-
-        Chambre chambre = chambreRepository.findById(r.getChambre().getIdChambre())
-                .orElseThrow(() -> new IllegalArgumentException("Chambre introuvable."));
-
-        if (reservationRepository.existsByChambreAndEstValideTrue(chambre)) {
-            throw new IllegalArgumentException("La chambre est déjà réservée et n'est pas disponible.");
-        }
-
-        int capacity = chambre.getType().getPlaces();
-        Set<Etudiant> resolvedEtudiants = new HashSet<>();
-
-        if (r.getEtudiants() != null) {
-            if (r.getEtudiants().size() > capacity) {
-                throw new IllegalArgumentException("Le nombre d'étudiants dépasse la capacité de la chambre.");
-            }
-            for (Etudiant etudiant : r.getEtudiants()) {
-                if (etudiant.getIdEtudiant() == null) {
-                    throw new IllegalArgumentException("Chaque étudiant doit être référencé par son identifiant.");
-                }
-                Etudiant resolved = etudiantRepository.findById(etudiant.getIdEtudiant())
-                        .orElseThrow(() -> new IllegalArgumentException("Étudiant introuvable: " + etudiant.getIdEtudiant()));
-                resolvedEtudiants.add(resolved);
-            }
-        }
-
-        r.setChambre(chambre);
-        r.setEtudiants(resolvedEtudiants);
-
-        return reservationRepository.save(r);
+        throw new IllegalStateException("Chambre already reserved");
     }
 
     @Override
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAll(); // Now with EntityGraph
     }
 
     @Override
     public Reservation getReservationById(String id) {
-        return reservationRepository.findById(id).orElse(null);
+        return reservationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Reservation not found: " + id));
     }
 
     @Override
-    @Transactional
     public Reservation updateReservation(Reservation r) {
-        if (r.getIdReservation() == null) {
-            throw new IllegalArgumentException("L'id de la réservation est obligatoire pour la mise à jour.");
-        }
-
-        Reservation existing = reservationRepository.findById(r.getIdReservation())
-                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable."));
-
-        if (r.getChambre() == null || r.getChambre().getIdChambre() == null) {
-            throw new IllegalArgumentException("La réservation doit inclure l'id de la chambre.");
-        }
-
-        Chambre chambre = chambreRepository.findById(r.getChambre().getIdChambre())
-                .orElseThrow(() -> new IllegalArgumentException("Chambre introuvable."));
-
-        reservationRepository.findByChambreAndEstValideTrue(chambre)
-                .filter(other -> !other.getIdReservation().equals(r.getIdReservation()))
-                .ifPresent(other -> {
-                    throw new IllegalArgumentException("La chambre est déjà réservée par une autre réservation valide.");
-                });
-
-        int capacity = chambre.getType().getPlaces();
-        Set<Etudiant> resolvedEtudiants = new HashSet<>();
-
-        if (r.getEtudiants() != null) {
-            if (r.getEtudiants().size() > capacity) {
-                throw new IllegalArgumentException("Le nombre d'étudiants dépasse la capacité de la chambre.");
-            }
-            for (Etudiant etudiant : r.getEtudiants()) {
-                if (etudiant.getIdEtudiant() == null) {
-                    throw new IllegalArgumentException("Chaque étudiant doit être référencé par son identifiant.");
-                }
-                Etudiant resolved = etudiantRepository.findById(etudiant.getIdEtudiant())
-                        .orElseThrow(() -> new IllegalArgumentException("Étudiant introuvable: " + etudiant.getIdEtudiant()));
-                resolvedEtudiants.add(resolved);
-            }
-        }
-
-        existing.setAnneeUniversitaire(r.getAnneeUniversitaire());
-        existing.setEstValide(r.getEstValide());
-        existing.setChambre(chambre);
-        existing.setEtudiants(resolvedEtudiants);
-
-        return reservationRepository.save(existing);
+        return reservationRepository.save(r);
     }
 
     @Override
@@ -130,24 +57,86 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public boolean isChambreAvailable(Long chambreId) {
-        Chambre chambre = chambreRepository.findById(chambreId)
-                .orElseThrow(() -> new IllegalArgumentException("Chambre introuvable."));
-        return !reservationRepository.existsByChambreAndEstValideTrue(chambre);
+        return !reservationRepository.existsByChambreIdChambreAndEstValideTrue(chambreId);
     }
 
     @Override
     public Reservation validateReservation(String id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable."));
-        reservation.setEstValide(true);
-        return reservationRepository.save(reservation);
+        Reservation r = getReservationById(id);
+        r.setEstValide(true);
+        return reservationRepository.save(r);
     }
 
     @Override
     public Reservation cancelReservation(String id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Réservation introuvable."));
-        reservation.setEstValide(false);
+        Reservation r = getReservationById(id);
+        r.setEstValide(false);
+        return reservationRepository.save(r);
+    }
+
+    @Override
+    public ReservationDTO convertToDTO(Reservation reservation) {
+        ReservationDTO dto = new ReservationDTO();
+        dto.setIdReservation(reservation.getIdReservation());
+        dto.setAnneeUniversitaire(reservation.getAnneeUniversitaire());
+        dto.setEstValide(reservation.isEstValide());
+        dto.setChambreId(reservation.getChambre().getIdChambre());
+        dto.setEtudiantIds(reservation.getEtudiants().stream().map(Etudiant::getIdEtudiant).collect(Collectors.toSet()));
+        if (reservation.getChambre() != null) {
+            dto.setNumeroChambre(reservation.getChambre().getNumeroChambre().toString());
+            if (reservation.getChambre().getBloc() != null) {
+                dto.setNomBloc(reservation.getChambre().getBloc().getNomBloc());
+            }
+        }
+        if (!reservation.getEtudiants().isEmpty()) {
+            String noms = reservation.getEtudiants().stream()
+                .map(e -> e.getNomEt() + " " + e.getPrenomEt())
+                .collect(Collectors.joining(", "));
+            dto.setNomEtudiant(noms);
+        }
+        return dto;
+    }
+
+    @Override
+    public List<ReservationDTO> getAllReservationDTOs() {
+        // To avoid N+1, fetch with graph (repo method needed? use findAll for now)
+        return getAllReservations().stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public Reservation createReservation(ReservationDTO dto) {
+        if (dto == null || dto.getChambreId() == null || dto.getEtudiantIds() == null || dto.getEtudiantIds().isEmpty() || dto.getAnneeUniversitaire() == null) {
+            throw new IllegalArgumentException("DTO missing required fields");
+        }
+
+        if (reservationRepository.existsByChambreIdChambreAndEstValideTrue(dto.getChambreId())) {
+            throw new IllegalStateException("Chambre is already reserved for the period");
+        }
+
+        Chambre chambre = chambreRepository.findById(dto.getChambreId())
+            .orElseThrow(() -> new EntityNotFoundException("Chambre not found with id: " + dto.getChambreId()));
+
+        Set<Etudiant> etudiants = dto.getEtudiantIds().stream()
+            .map(id -> etudiantRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Etudiant not found with id: " + id)))
+            .collect(Collectors.toSet());
+
+        if (etudiants.size() > chambre.getType().getPlaces()) {
+            throw new IllegalArgumentException("Number of students (" + etudiants.size() + ") exceeds room capacity (" + chambre.getType().getPlaces() + ")");
+        }
+
+        // Generate unique Smart ID
+        String year = String.valueOf(dto.getAnneeUniversitaire().getYear());
+        String baseId = "R" + chambre.getNumeroChambre() + "-" + year;
+        String idReservation = baseId;
+        int suffix = 1;
+        while (reservationRepository.existsById(idReservation)) {
+            idReservation = baseId + "-" + suffix++;
+        }
+
+        Reservation reservation = new Reservation(idReservation, dto.getAnneeUniversitaire(), dto.isEstValide(), chambre, etudiants);
         return reservationRepository.save(reservation);
     }
 }

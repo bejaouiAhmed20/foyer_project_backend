@@ -1,13 +1,12 @@
 package com.example.demo.serviceImpl;
 
-
 import com.example.demo.entity.Universite;
 import com.example.demo.repository.UniversiteRepository;
 import com.example.demo.service.UniversiteService;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class UniversiteServiceImpl implements UniversiteService {
 
     @Override
     public Universite getUniversiteById(Long id) {
-        return universiteRepository.findById(id).orElse(null);
+        return universiteRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Universite not found with id: " + id));
     }
 
     @Override

@@ -1,31 +1,37 @@
 package com.example.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Reservation {
 
     @Id
+    @Column(nullable = false, unique = true)
+    @EqualsAndHashCode.Include
     private String idReservation;
 
     private LocalDate anneeUniversitaire;
 
-    private Boolean estValide;
+    private boolean estValide;
 
     @ManyToOne
     @JsonIgnoreProperties({"reservations", "bloc"})
     private Chambre chambre;
+
     @ManyToMany
+    @ToString.Exclude
     private Set<Etudiant> etudiants = new HashSet<>();
 }

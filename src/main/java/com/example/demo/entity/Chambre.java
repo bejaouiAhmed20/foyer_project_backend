@@ -3,17 +3,23 @@ package com.example.demo.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Chambre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long idChambre;
 
     private Long numeroChambre;
@@ -27,5 +33,6 @@ public class Chambre {
 
     @OneToMany(mappedBy = "chambre")
     @JsonIgnore
+    @ToString.Exclude
     private List<Reservation> reservations = new ArrayList<>();
 }

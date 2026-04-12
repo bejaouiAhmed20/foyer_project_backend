@@ -3,10 +3,10 @@ package com.example.demo.serviceImpl;
 import com.example.demo.entity.Bloc;
 import com.example.demo.repository.BlocRepository;
 import com.example.demo.service.BlocService;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class BlocServiceImpl implements BlocService {
 
     @Override
     public Bloc getBlocById(Long id) {
-        return blocRepository.findById(id).orElse(null);
+        return blocRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Bloc not found with id: " + id));
     }
 
     @Override

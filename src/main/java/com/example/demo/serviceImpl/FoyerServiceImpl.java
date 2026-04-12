@@ -4,10 +4,10 @@ import com.example.demo.entity.Foyer;
 import com.example.demo.repository.FoyerRepository;
 import com.example.demo.repository.UniversiteRepository;
 import com.example.demo.service.FoyerService;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class FoyerServiceImpl implements FoyerService {
 
     @Override
     public Foyer getFoyerById(Long id) {
-        return foyerRepository.findById(id).orElse(null);
+        return foyerRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Foyer not found with id: " + id));
     }
 
     @Override

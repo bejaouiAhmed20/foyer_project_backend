@@ -4,10 +4,10 @@ import com.example.demo.entity.Chambre;
 import com.example.demo.repository.BlocRepository;
 import com.example.demo.repository.ChambreRepository;
 import com.example.demo.service.ChambreService;
+import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class ChambreServiceImpl implements ChambreService {
     @Override
     public Chambre addChambre(Chambre c) {
         if (c.getBloc() != null && c.getBloc().getIdBloc() != null) {
-            c.setBloc(blocRepository.findById(c.getBloc().getIdBloc()).orElse(null));
+            c.setBloc(blocRepository.findById(c.getBloc().getIdBloc()).orElseThrow(() -> new EntityNotFoundException("Bloc not found with id: " + c.getBloc().getIdBloc())));
         }
         return chambreRepository.save(c);
     }
@@ -31,7 +31,7 @@ public class ChambreServiceImpl implements ChambreService {
 
     @Override
     public Chambre getChambreById(Long id) {
-        return chambreRepository.findById(id).orElse(null);
+        return chambreRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Chambre not found with id: " + id));
     }
 
     @Override
@@ -42,5 +42,11 @@ public class ChambreServiceImpl implements ChambreService {
     @Override
     public void deleteChambre(Long id) {
         chambreRepository.deleteById(id);
+    }
+
+    public List<Chambre> getAvailableChambres() {
+        return chambreRepository.findAll().stream()
+                .filter(c -> c.getReservations().stream().filter(r -> r.isEstValide()).count() < c.getType().getPlaces())
+                .toList();
     }
 }
