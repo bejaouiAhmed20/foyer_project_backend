@@ -22,4 +22,5 @@ public class Universite {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Foyer foyer;
+
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ai")
-@CrossOrigin("*") 
 public class ChatbotController {
 
     @PostMapping("/chat")
