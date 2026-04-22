@@ -38,4 +38,9 @@ public class BlocController {
     public void deleteBloc(@PathVariable Long id) {
         blocService.deleteBloc(id);
     }
+
+    @PutMapping("/{blocId}/foyer/{foyerId}")
+    public Bloc assignBlocToFoyer(@PathVariable Long blocId, @PathVariable Long foyerId) {
+        return blocService.assignBlocToFoyer(blocId, foyerId);
+    }
 }

@@ -32,8 +32,12 @@ public class Etudiant {
 
     private LocalDate dateNaissance;
 
-    @ManyToMany(mappedBy = "etudiants")
-    @JsonIgnore
-    @ToString.Exclude
-    private Set<Reservation> reservations = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "reservation_etudiants",
+            joinColumns = @JoinColumn(name = "reservation_id_reservation"), // This fixes the column mismatch!
+            inverseJoinColumns = @JoinColumn(name = "etudiants_id_etudiant")
+    )
+    private Set<Etudiant> etudiants = new HashSet<>();
+
 }

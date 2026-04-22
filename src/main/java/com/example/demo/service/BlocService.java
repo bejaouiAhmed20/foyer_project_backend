@@ -15,4 +15,6 @@ public interface BlocService {
     Bloc updateBloc(Bloc b);
 
     void deleteBloc(Long id);
+
+    Bloc assignBlocToFoyer(Long blocId, Long foyerId);
 }

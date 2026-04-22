@@ -4,8 +4,16 @@ info:
   seq: 1
 
 http:
-  method: POST
-  url: http://localhost:8080http://localhost:8080
+  method: GET
+  url: http://localhost:8080/universite
+  body:
+    type: json
+    data: |-
+      {
+        
+        
+        
+      }
   auth: inherit
 
 settings:

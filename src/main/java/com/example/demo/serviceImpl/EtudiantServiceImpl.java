@@ -1,6 +1,7 @@
 package com.example.demo.serviceImpl;
 
 import com.example.demo.entity.Etudiant;
+import com.example.demo.entity.Reservation;
 import com.example.demo.repository.EtudiantRepository;
 import com.example.demo.service.EtudiantService;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,5 +38,13 @@ public class EtudiantServiceImpl implements EtudiantService {
     @Override
     public void deleteEtudiant(Long id) {
         etudiantRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Reservation> getReservationsByEtudiantId(Long id) {
+        if (!etudiantRepository.existsById(id)) {
+            throw new EntityNotFoundException("Etudiant not found with id: " + id);
+        }
+        return etudiantRepository.findReservationsByEtudiantId(id);
     }
 }
