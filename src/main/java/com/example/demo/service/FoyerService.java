@@ -17,4 +17,6 @@ public interface FoyerService {
     void deleteFoyer(Long id);
 
     Foyer linkUniversite(Long foyerId, Long universiteId);
+
+    Foyer ajouterFoyerEtAffecterAUniversite(Foyer foyer, long idUniversite);
 }

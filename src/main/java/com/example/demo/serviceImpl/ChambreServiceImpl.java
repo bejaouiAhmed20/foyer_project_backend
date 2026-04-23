@@ -1,6 +1,7 @@
 package com.example.demo.serviceImpl;
 
 import com.example.demo.entity.Chambre;
+import com.example.demo.entity.TypeChambre;
 import com.example.demo.repository.BlocRepository;
 import com.example.demo.repository.ChambreRepository;
 import com.example.demo.service.ChambreService;
@@ -8,9 +9,11 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChambreServiceImpl implements ChambreService {
 
     private final ChambreRepository chambreRepository;
@@ -48,5 +51,20 @@ public class ChambreServiceImpl implements ChambreService {
         return chambreRepository.findAll().stream()
                 .filter(c -> c.getReservations().stream().filter(r -> r.isEstValide()).count() < c.getType().getPlaces())
                 .toList();
+    }
+
+    @Override
+    public List<Chambre> getChambresParNomBloc(String nomBloc) {
+        return chambreRepository.findByBlocNomBloc(nomBloc);
+    }
+
+    @Override
+    public long nbChambreParTypeEtBloc(TypeChambre type, long idBloc) {
+        return chambreRepository.countByTypeAndBlocIdBloc(type, idBloc);
+    }
+
+    @Override
+    public List<Chambre> getChambresNonReserveParNomFoyerEtTypeChambre(String nomFoyer, TypeChambre type) {
+        return chambreRepository.findChambresNonReserveesByFoyerAndType(nomFoyer, type);
     }
 }

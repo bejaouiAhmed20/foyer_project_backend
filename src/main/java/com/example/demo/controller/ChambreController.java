@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Chambre;
+import com.example.demo.entity.TypeChambre;
 import com.example.demo.service.ChambreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,21 @@ public class ChambreController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chambre introuvable ou typologie non définie.");
         }
         return chambre.getType().getPlaces();
+    }
+
+    @GetMapping("/par-bloc/{nomBloc}")
+    public List<Chambre> getChambresParNomBloc(@PathVariable String nomBloc) {
+        return chambreService.getChambresParNomBloc(nomBloc);
+    }
+
+    @GetMapping("/count/type/{type}/bloc/{idBloc}")
+    public long nbChambreParTypeEtBloc(@PathVariable TypeChambre type, @PathVariable long idBloc) {
+        return chambreService.nbChambreParTypeEtBloc(type, idBloc);
+    }
+
+    @GetMapping("/non-reservees")
+    public List<Chambre> getChambresNonReservees(@RequestParam String nomFoyer, @RequestParam TypeChambre type) {
+        return chambreService.getChambresNonReserveParNomFoyerEtTypeChambre(nomFoyer, type);
     }
 
     @PutMapping

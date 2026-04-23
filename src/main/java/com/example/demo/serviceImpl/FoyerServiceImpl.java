@@ -1,6 +1,7 @@
 package com.example.demo.serviceImpl;
 
 import com.example.demo.entity.Foyer;
+import com.example.demo.entity.Universite;
 import com.example.demo.repository.FoyerRepository;
 import com.example.demo.repository.UniversiteRepository;
 import com.example.demo.service.FoyerService;
@@ -8,9 +9,11 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FoyerServiceImpl implements FoyerService {
 
     private final FoyerRepository foyerRepository;
@@ -54,5 +57,16 @@ public class FoyerServiceImpl implements FoyerService {
                     return foyer;
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Université introuvable."));
+    }
+
+    @Override
+    public Foyer ajouterFoyerEtAffecterAUniversite(Foyer foyer, long idUniversite) {
+        Universite universite = universiteRepository.findById(idUniversite)
+                .orElseThrow(() -> new EntityNotFoundException("Universite not found with id: " + idUniversite));
+        Foyer savedFoyer = foyerRepository.save(foyer);
+        universite.setFoyer(savedFoyer);
+        savedFoyer.setUniversite(universite);
+        universiteRepository.save(universite);
+        return foyerRepository.save(savedFoyer);
     }
 }

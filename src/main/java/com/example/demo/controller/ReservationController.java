@@ -5,9 +5,11 @@ import com.example.demo.entity.Reservation;
 import com.example.demo.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -66,5 +68,22 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable String id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/ajouter-et-assigner")
+    public Reservation ajouterReservationEtAssigner(@RequestParam Long numChambre, @RequestParam String cin) {
+        return reservationService.ajouterReservationEtAssignerAChambreEtAEtudiant(numChambre, cin);
+    }
+
+    @PutMapping("/annuler/{cin}")
+    public Reservation annulerReservation(@PathVariable long cin) {
+        return reservationService.annulerReservation(cin);
+    }
+
+    @GetMapping("/count")
+    public long getReservationParAnnee(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate debutAnnee,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate finAnnee) {
+        return reservationService.getReservationParAnneeUniversitaire(debutAnnee, finAnnee);
     }
 }

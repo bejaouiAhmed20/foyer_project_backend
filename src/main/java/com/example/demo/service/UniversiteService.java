@@ -15,4 +15,6 @@ public interface UniversiteService {
     Universite updateUniversite(Universite u);
 
     void deleteUniversite(Long id);
+
+    Universite desaffecterFoyerAUniversite(long idUniversite);
 }

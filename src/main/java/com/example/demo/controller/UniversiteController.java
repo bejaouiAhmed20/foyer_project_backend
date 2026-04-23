@@ -43,4 +43,9 @@ public class UniversiteController {
     public void deleteUniversite(@PathVariable Long id) {
         universiteService.deleteUniversite(id);
     }
+
+    @PutMapping("/{id}/desaffecter-foyer")
+    public Universite desaffecterFoyer(@PathVariable Long id) {
+        return universiteService.desaffecterFoyerAUniversite(id);
+    }
 }

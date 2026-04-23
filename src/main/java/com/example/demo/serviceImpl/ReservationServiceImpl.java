@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -103,6 +104,50 @@ public class ReservationServiceImpl implements ReservationService {
         return getAllReservations().stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Reservation ajouterReservationEtAssignerAChambreEtAEtudiant(Long numChambre, String cin) {
+        Etudiant etudiant = etudiantRepository.findByCin(Long.parseLong(cin));
+        if (etudiant == null) throw new EntityNotFoundException("Etudiant not found with cin: " + cin);
+
+        Chambre chambre = chambreRepository.findByNumeroChambre(numChambre);
+        if (chambre == null) throw new EntityNotFoundException("Chambre not found with numero: " + numChambre);
+
+        long activeReservations = chambre.getReservations().stream().filter(Reservation::isEstValide).count();
+        if (activeReservations >= chambre.getType().getPlaces())
+            throw new IllegalStateException("Chambre is full");
+
+        LocalDate now = LocalDate.now();
+        int startYear = now.getMonthValue() >= 9 ? now.getYear() : now.getYear() - 1;
+        String annee = startYear + "/" + (startYear + 1);
+        String nomBloc = chambre.getBloc() != null ? chambre.getBloc().getNomBloc() : "NoBloc";
+        String idReservation = annee + "-" + nomBloc + "-" + numChambre + "-" + cin;
+
+        if (reservationRepository.existsById(idReservation))
+            throw new IllegalStateException("Reservation already exists: " + idReservation);
+
+        Reservation reservation = new Reservation();
+        reservation.setIdReservation(idReservation);
+        reservation.setAnneeUniversitaire(LocalDate.of(startYear, 9, 1));
+        reservation.setEstValide(true);
+        reservation.setChambre(chambre);
+        reservation.setEtudiants(new java.util.HashSet<>(java.util.Set.of(etudiant)));
+        return reservationRepository.save(reservation);
+    }
+
+    @Override
+    public Reservation annulerReservation(long cinEtudiant) {
+        Reservation reservation = reservationRepository.findByEtudiantsCin(cinEtudiant)
+                .stream().filter(Reservation::isEstValide).findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("No active reservation found for cin: " + cinEtudiant));
+        reservation.setEstValide(false);
+        return reservationRepository.save(reservation);
+    }
+
+    @Override
+    public long getReservationParAnneeUniversitaire(LocalDate debutAnnee, LocalDate finAnnee) {
+        return reservationRepository.countByAnneeUniversitaireBetween(debutAnnee, finAnnee);
     }
 
     @Override

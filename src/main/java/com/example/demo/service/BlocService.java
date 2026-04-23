@@ -17,4 +17,8 @@ public interface BlocService {
     void deleteBloc(Long id);
 
     Bloc assignBlocToFoyer(Long blocId, Long foyerId);
+
+    Bloc affecterChambresABloc(List<Long> numChambre, String nomBloc);
+
+    Bloc affecterBlocAFoyer(String nomBloc, String nomFoyer);
 }

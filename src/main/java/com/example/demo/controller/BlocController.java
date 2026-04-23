@@ -43,4 +43,14 @@ public class BlocController {
     public Bloc assignBlocToFoyer(@PathVariable Long blocId, @PathVariable Long foyerId) {
         return blocService.assignBlocToFoyer(blocId, foyerId);
     }
+
+    @PutMapping("/affecter-chambres")
+    public Bloc affecterChambresABloc(@RequestParam List<Long> numChambre, @RequestParam String nomBloc) {
+        return blocService.affecterChambresABloc(numChambre, nomBloc);
+    }
+
+    @PutMapping("/affecter-foyer")
+    public Bloc affecterBlocAFoyer(@RequestParam String nomBloc, @RequestParam String nomFoyer) {
+        return blocService.affecterBlocAFoyer(nomBloc, nomFoyer);
+    }
 }

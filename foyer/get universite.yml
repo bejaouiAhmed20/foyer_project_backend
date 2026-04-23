@@ -1,5 +1,5 @@
 info:
-  name: create universite
+  name: get universite
   type: http
   seq: 1
 

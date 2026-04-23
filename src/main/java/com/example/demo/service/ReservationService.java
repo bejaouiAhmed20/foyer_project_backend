@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Reservation;
 import com.example.demo.dto.ReservationDTO;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationService {
@@ -29,5 +30,11 @@ public interface ReservationService {
 
     // New DTO-based creation method
     Reservation createReservation(ReservationDTO dto);
+
+    Reservation ajouterReservationEtAssignerAChambreEtAEtudiant(Long numChambre, String cin);
+
+    Reservation annulerReservation(long cinEtudiant);
+
+    long getReservationParAnneeUniversitaire(LocalDate debutAnnee, LocalDate finAnnee);
 
 }
